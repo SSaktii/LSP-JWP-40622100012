@@ -8,11 +8,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     switch ($action) {
         case 'add':
-            tambahTugas($_POST['title'] ?? '');
+            tambahTugas($_POST['title'] ?? '', $_POST['date'] ?? '');
             break;
 
         case 'toggle':
             toggleStatus((int)($_POST['id'] ?? 0));
+            break;
+
+        case 'edit':
+            editTugas((int)($_POST['id'] ?? 0), $_POST['title'] ?? '');
             break;
 
         case 'delete':
@@ -42,14 +46,14 @@ $totalSelesai = count(array_filter($tasks, fn($t) => $t['status'] === 'selesai')
     <style>
         body { background-color: #f5f7fa; }
         .app-card { max-width: 700px; margin: 40px auto; }
-        header.app-header { background: #72718e; color: #fff; padding: 1.25rem 1.5rem; border-radius: .5rem .5rem 0 0; }
+        header.app-header { background: #4f46e5; color: #fff; padding: 1.25rem 1.5rem; border-radius: .5rem .5rem 0 0; }
     </style>
 </head>
 <body>
 
 <div class="app-card card shadow-sm">
     <header class="app-header">
-        <h1 class="h4 mb-0"> Aplikasi To-Do List</h1>
+        <h1 class="h4 mb-0">To-Do List</h1>
         <small><?= $totalSelesai ?> dari <?= $totalTugas ?> tugas selesai</small>
     </header>
 
@@ -57,8 +61,11 @@ $totalSelesai = count(array_filter($tasks, fn($t) => $t['status'] === 'selesai')
 
         <form method="post" class="row g-2 mb-4">
             <input type="hidden" name="action" value="add">
-            <div class="col-9">
+            <div class="col-6">
                 <input type="text" name="title" class="form-control" placeholder="Tulis tugas baru..." required>
+            </div>
+            <div class="col-3">
+                <input type="date" name="date" class="form-control" value="<?= date('Y-m-d') ?>">
             </div>
             <div class="col-3 d-grid">
                 <button type="submit" class="btn btn-primary">Tambah</button>
@@ -72,6 +79,7 @@ $totalSelesai = count(array_filter($tasks, fn($t) => $t['status'] === 'selesai')
                     <th></th>
                     <th>Tugas</th>
                     <th>Status</th>
+                    <th>Tanggal</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -97,6 +105,16 @@ $totalSelesai = count(array_filter($tasks, fn($t) => $t['status'] === 'selesai')
         const rowCheckboxes = document.querySelectorAll('.row-checkbox');
         rowCheckboxes.forEach(cb => cb.checked = this.checked);
     });
+
+    // Tampilkan/sembunyikan form edit inline untuk satu baris tugas
+    function toggleEdit(id) {
+        const viewEl = document.getElementById('title-view-' + id);
+        const editEl = document.getElementById('title-edit-' + id);
+        const isEditing = !editEl.classList.contains('d-none');
+
+        viewEl.classList.toggle('d-none', !isEditing);
+        editEl.classList.toggle('d-none', isEditing);
+    }
 </script>
 </body>
 </html>
